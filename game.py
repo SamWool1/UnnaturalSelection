@@ -1,19 +1,25 @@
 
 from Species import Species
+from Species import traits
 from Environment import Environment
+from random import choice
 
 class GameState(object):
 	def __init__(self):
+		'''
 		self.sp_player = self.initialize_player()
 		self.sp_ai = [self.initialize_species([], 100, 1)] #start with just one ai opponent
-
-		self.all_sp = [self.sp_player] + self.sp_ai
+		'''
 
 		self.environment = self.initialize_environment()
 
+		#self.all_sp = [Species([], 100, 2), Species([], 100, 1)]
+		self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
+
+
 	def initialize_player(self):
 		# Should hold logic for player-controlled species initialization
-		sp_player = self.initialize_species([], 100, 1)
+		sp_player = self.initialize_species([], 100, 2)
 		print("Created player species: ", sp_player)
 		return sp_player
 
@@ -34,7 +40,8 @@ class GameState(object):
 	def is_over(self):
 		# Should return whether or not a game is over or not, dependent upon
 		# whether or completion conditions have been met
-		print("is_over() is not implemented")
+		#print("is_over() is not implemented")
+		pass
 
 	def display_player_choices(self):
 		# Should display the current state of the player species, how many evolution
@@ -44,34 +51,74 @@ class GameState(object):
 
 	def modify_species(self, mod, index):
 		# Should apply the chosen evolution to the specified species (player is index 0)
-		
+		self.all_sp[index].add_trait(mod)
 
-		print("modify_species() is not implemented")
 
 def evolve_player(state):
-	
-	#state.modify_species(read_input(), 0)
+	# Should evolve the species controlled by the player
 
-	print("evolve_player() is not implemented")
+	mod = read_input(state)
+	if mod:
+		state.modify_species(mod, 0)
 
-def read_input():
+def read_input(state):
 	# Should read player choice about which evolution to take, or any other
 	# inputs we choose the allow the player to feed in, and ensure that it
 	# is an appropriate input
-	print("read_input() is not yet implemented")
+
+	# find all the evolution options for the species
+	possible_evolutions = evolutions(state.all_sp[0])
+
+	while possible_evolutions:
+		# print all the evolutions options for the species
+		print("Evolution options: ")
+		print(possible_evolutions)   # can add printing more info later
+		evolution = input("Choose an evolution for species: ")
+		if (evolution in possible_evolutions):
+			return evolution
+		else:
+			print("Please enter the name of one of the evolution options")
+
+	print("No Evolution Options")
+
+def evolutions(species):
+	# Should find all the possible evolutions the species can take
+	evolutions = []
+
+	#filter through traits to get what the species doesnt already have, what the species can afford, and what the species has all the requirements for
+	evolutions = list(
+		filter(lambda trait: traits[trait]['requires'].issubset(species.traits), 
+			filter(lambda trait: traits[trait]['cost'] <= species.population_size, 
+				filter(lambda trait: trait not in species.traits, traits.keys()))))
+
+	#print("possible evolutions:", evolutions)
+	#print("current traits: ", species.traits)
+
+	return evolutions
+
 
 def evolve_ai(state):
 	# Should make the evolution choices for the AI controlled species
 
-	for ai in state.sp_ai:
-		random_evolve(ai)  # can later implement different evolve functions for different ai species (ex: random evolution, greedy evolution, etc.)
+	evolution = random_evolve(state.all_sp[1])
+	if evolution:
+			state.modify_species(evolution, 1)  # can later implement different evolve functions for different ai species (ex: random evolution, greedy evolution, etc.)
 
-	print("evolve_ai() is not implemented")
+	'''
+	i = 1
+
+	while i < len(state.all_sp):
+		evolution = random_evolve(state.all_sp[i])
+		if evolution:
+			state.modify_species(evolution, i)  # can later implement different evolve functions for different ai species (ex: random evolution, greedy evolution, etc.)
+		i += 1
+		'''
 
 def random_evolve(species):
-	#state.modify_species(  , ai)
-	print("random_evolve() is not implemented")
+	possible_evolutions = evolutions(species)
 
+	if possible_evolutions:
+		return choice(possible_evolutions)
 
 
 def execute_turn(state):
@@ -109,7 +156,7 @@ def print_results():
 
 if __name__ == "__main__":
 	state = GameState()
-	turn_counter = 20 # We may not want this, for now just here so the loop eventually terminates
+	turn_counter = 2 # We may not want this, for now just here so the loop eventually terminates
 
 	while not state.is_over() and turn_counter > 0:
 
