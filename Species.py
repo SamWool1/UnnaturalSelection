@@ -2,6 +2,7 @@
 import json
 import copy
 
+#a dictionary of traits
 traits = {
     "arms": {
         "stats": {
@@ -11,15 +12,163 @@ traits = {
         },
 		"requires": set([]),
         "cost": 1
-      },
+    },
     "long arms": {
         "stats": {
-            "attack": 1,
+            "attack": 2,
             "speed": 1,
             "stealth": 1
         },
         "requires": set([
 		    "arms"
+        ]),
+        "cost": 1
+	},
+    "legs": {
+        "stats": {
+            "attack": 1,
+            "speed": 1,
+            "stealth": 1
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "long legs": {
+        "stats": {
+            "attack": 1,
+            "speed": 2,
+            "stealth": 1
+        },
+        "requires": set([
+		    "legs"
+        ]),
+        "cost": 1
+	},
+    "teeth": {
+        "stats": {
+            "attack": 2
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "sharp teeth": {
+        "stats": {
+            "attack": 4
+        },
+        "requires": set([
+		    "teeth"
+        ]),
+        "cost": 1
+	},
+    "fur": {
+        "stats": {
+            "defense": 1,
+            "stealth": 1
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "horn": {
+        "stats": {
+            "attack": 2
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "eyes": {
+        "stats": {
+            "spotting": 1
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "good eyes": {
+        "stats": {
+            "spotting": 2
+        },
+        "requires": set([
+		    "eyes"
+        ]),
+        "cost": 1
+	},
+    "compound eyes": {
+        "stats": {
+            "spotting": 4
+        },
+        "requires": set([
+		    "eyes"
+        ]),
+        "cost": 1
+	},
+    "wings": {
+        "stats": {
+            "speed": 2
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "good wings": {
+        "stats": {
+            "speed": 3,
+            "stealth": 1
+        },
+        "requires": set([
+		    "wings"
+        ]),
+        "cost": 1
+	},
+    "shell": {
+        "stats": {
+            "defense": 2
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "hard shell": {
+        "stats": {
+            "defense": 4
+        },
+        "requires": set([
+		    "shell"
+        ]),
+        "cost": 1
+	},
+    "claws": {
+        "stats": {
+            "attack": 2
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "sharp claws": {
+        "stats": {
+            "attack": 4
+        },
+        "requires": set([
+		    "claws"
+        ]),
+        "cost": 1
+	},
+    "camouflage": {
+        "stats": {
+            "stealth": 3
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "ears": {
+        "stats": {
+            "spotting": 1
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "good ears": {
+        "stats": {
+            "spotting": 2
+        },
+        "requires": set([
+		    "ears"
         ]),
         "cost": 1
 	}
