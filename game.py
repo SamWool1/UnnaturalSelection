@@ -3,6 +3,8 @@ from Species import Species
 from Species import traits
 from Environment import Environment
 from random import choice
+from time import time
+from math import floor
 
 class GameState(object):
 	def __init__(self):
@@ -10,16 +12,19 @@ class GameState(object):
 		self.sp_player = self.initialize_player()
 		self.sp_ai = [self.initialize_species([], 100, 1)] #start with just one ai opponent
 		'''
+		print("Initializing new game...")
 
 		self.environment = self.initialize_environment()
 
 		#self.all_sp = [Species([], 100, 2), Species([], 100, 1)]
 		self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
 
+		print()
+
 
 	def initialize_player(self):
 		# Should hold logic for player-controlled species initialization
-		sp_player = self.initialize_species([], 100, 2)
+		sp_player = Species([], 100, 2)
 		print("Created player species: ", sp_player)
 		return sp_player
 
@@ -54,12 +59,9 @@ class GameState(object):
 		self.all_sp[index].add_trait(mod)
 
 
-def evolve_player(state):
+def evolve_player(state, mod):
 	# Should evolve the species controlled by the player
-
-	mod = read_input(state)
-	if mod:
-		state.modify_species(mod, 0)
+	state.modify_species(mod, 0)
 
 def read_input(state):
 	# Should read player choice about which evolution to take, or any other
@@ -69,15 +71,26 @@ def read_input(state):
 	# find all the evolution options for the species
 	possible_evolutions = evolutions(state.all_sp[0])
 
+	# print all information about the player species, AI species, and possible
+	# evolutions to be selected
+	print("Your species: ")
+	print(state.all_sp[0])
+	print("AI species: ")
+	for ai in state.all_sp[1:]:
+		print(ai)
+	print("Your evolution options: ")
+	for ev in possible_evolutions:
+		print("Evolution: ", ev)
+		print("    Cost: ", traits[ev]["cost"])
+		print("    Stats: ", traits[ev]["stats"])
+
 	while possible_evolutions:
-		# print all the evolutions options for the species
-		print("Evolution options: ")
-		print(possible_evolutions)   # can add printing more info later
-		evolution = input("Choose an evolution for species: ")
-		if (evolution in possible_evolutions):
-			return evolution
+		read = input("Choose an evolution for species or type 'quit' to quit: ")
+		if read in possible_evolutions or read == "quit":
+			return read
 		else:
-			print("Please enter the name of one of the evolution options")
+			print()
+			print("Please enter the name of one of the evolution options or type 'quit' to quit")
 
 	print("No Evolution Options")
 
@@ -124,6 +137,9 @@ def random_evolve(species):
 def execute_turn(state):
 	# Should simulate the interactions/competitions between all the species
 
+	print("Executing Turn...")
+	start_time = time()
+
 	#Lotka Volterra competition model, works only for competition between two species right now
 
 	# first species 
@@ -148,20 +164,35 @@ def execute_turn(state):
 
 			sp1.population_size += population_change
 
+	# Print execution time
+	time_diff = floor(time() - start_time)
+	if time_diff < 1:
+		print("Executed in less than one second")
+	else:
+		print("Executed in", time_diff, "seconds")
+
+
 def print_results():
 	# Should print the important information about the turn that just occured.
 	# It's possible we want this to occur in execute_turn() and this function
 	# is unnecessary
 	print("Updated species: ", list(map(lambda sp: int(sp.population_size), state.all_sp)))
+	print("")
 
 if __name__ == "__main__":
 	state = GameState()
-	turn_counter = 2 # We may not want this, for now just here so the loop eventually terminates
+	max_turn = 5
+	cur_turn = 0
 
-	while not state.is_over() and turn_counter > 0:
+	while not state.is_over() and cur_turn < max_turn:
+		print("Turn ", cur_turn)
+		# read player input
+		mod = read_input(state)
+		if mod == "quit":
+			break
 
 		# player chooses how to evolve their species
-		evolve_player(state)
+		evolve_player(state, mod)
 
 		# ai chooses how to evolve their species
 		evolve_ai(state) 
@@ -172,7 +203,8 @@ if __name__ == "__main__":
 		# results of the round are printed to the player 
 		print_results()
 
-		turn_counter -= 1
+		cur_turn += 1
+		print()
 
 
 	print("Game over, thanks for playing")
