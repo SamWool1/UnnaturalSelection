@@ -171,6 +171,42 @@ def execute_turn(state):
 	else:
 		print("Executed in", time_diff, "seconds")
 
+	
+	# Determines outcome of a species encountering and hunting another
+	def species_encounter(species_a, species_b):
+		# Determine predator and prey
+		predator, prey = None, None
+		pred_rating_a = species_a.rand_sized_stat("attack")
+		pred_rating_b = species_b.rand_sized_stat("attack")
+
+		if (pred_rating_a < pred_rating_b):
+			prey = species_a
+			predator = species_b
+		else:
+			prey = species_b
+			predator = species_a		
+		pred_size_advntg = predator.stats["size"] / prey.stats["size"]
+
+		# Calculate penalties for stealth, speed, defense checks
+		penalties = {}
+		penalties["stealth"] = max(prey.rand_sized_stat("stealth", True) - predator.rand_sized_stat("spotting", True), 0)
+		penalties["speed"] = max(prey.rand_sized_stat("speed") - predator.rand_sized_stat("speed"), 0)
+		penalties["defense"] = max(prey.rand_sized_stat("defense") - predator.rand_sized_stat("attack"), 0)
+
+		# Calculate total overall penalty 
+		# TODO Will need testing and adjusting
+		total_penalty = 0
+		for _, penalty in penalties.items():
+			total_penalty = penalty + total_penalty
+
+		# Reduce prey population, adjusted by penalty for failing checks and size, to represent hunting
+		# TODO Put cap on individuals hunted relative to amount of food needed by predators
+		individuals_hunted = max(pred_size_advntg * predator.population_size - total_penalty, 0)
+		prey.population_size = prey.population_size - individuals_hunted
+
+		# TODO Reduce food needed for predator this turn according to number of individuals hunted
+
+
 
 def print_results():
 	# Should print the important information about the turn that just occured.

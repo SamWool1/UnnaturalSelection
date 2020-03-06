@@ -1,6 +1,7 @@
 
 import json
 import copy
+import random
 
 #a dictionary of traits
 traits = {
@@ -217,5 +218,20 @@ class Species(object):
                 self.stats[stat] = sum(d[stat] for d in [self.stats, mod_stats])
 
         self.traits.add(trait)
+
+    # Returns {stat} * size, or -1 if {stat} invalid
+    # If invert is true, stat's correlation to size is inverse (i.e. size goes up, stat goes down)
+    def sized_stat(self, stat, invert=False):
+        if stat not in self.stats.keys() or stat == "size":
+            return -1
+        else:
+            if not invert:
+                return self.stats[stat] * self.stats["size"]
+            else:
+                return self.stats[stat] / self.stats["size"]
+
+    # Returns sized stat * random number between 0 and 1
+    def rand_sized_stat(self, stat, invert=False):
+        return self.sized_stat(stat, invert) * random.random()
 
     # TODO: stuff related to evo pts, death/birthrates, changing stats, and more
