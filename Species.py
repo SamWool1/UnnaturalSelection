@@ -23,7 +23,7 @@ traits = {
         "requires": set([
 		    "arms"
         ]),
-        "cost": 1
+        "cost": 2
 	},
     "legs": {
         "stats": {
@@ -43,7 +43,7 @@ traits = {
         "requires": set([
 		    "legs"
         ]),
-        "cost": 1
+        "cost": 2
 	},
     "teeth": {
         "stats": {
@@ -59,7 +59,7 @@ traits = {
         "requires": set([
 		    "teeth"
         ]),
-        "cost": 1
+        "cost": 2
 	},
     "fur": {
         "stats": {
@@ -90,7 +90,7 @@ traits = {
         "requires": set([
 		    "eyes"
         ]),
-        "cost": 1
+        "cost": 2
 	},
     "compound eyes": {
         "stats": {
@@ -99,7 +99,7 @@ traits = {
         "requires": set([
 		    "eyes"
         ]),
-        "cost": 1
+        "cost": 3
 	},
     "wings": {
         "stats": {
@@ -116,7 +116,7 @@ traits = {
         "requires": set([
 		    "wings"
         ]),
-        "cost": 1
+        "cost": 2
 	},
     "shell": {
         "stats": {
@@ -132,7 +132,7 @@ traits = {
         "requires": set([
 		    "shell"
         ]),
-        "cost": 1
+        "cost": 2
 	},
     "claws": {
         "stats": {
@@ -148,14 +148,14 @@ traits = {
         "requires": set([
 		    "claws"
         ]),
-        "cost": 1
+        "cost": 2
 	},
     "camouflage": {
         "stats": {
             "stealth": 3
         },
 		"requires": set([]),
-        "cost": 1
+        "cost": 2
     },
     "ears": {
         "stats": {
@@ -171,7 +171,7 @@ traits = {
         "requires": set([
 		    "ears"
         ]),
-        "cost": 1
+        "cost": 2
 	}
 }
 
