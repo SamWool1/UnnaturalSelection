@@ -65,6 +65,9 @@ def evolve_player(state, mod):
 	state.modify_species(mod, 0)
 
 def read_input(state):
+	# Environment stat print
+	print("Environment currently has", int(state.environment.resources), "units worth of food")
+
 	# Should read player choice about which evolution to take, or any other
 	# inputs we choose the allow the player to feed in, and ensure that it
 	# is an appropriate input
@@ -145,8 +148,15 @@ def execute_turn(state):
 
 	#Lotka Volterra competition model, works only for competition between two species right now
 	# TODO Species hunting
+	for sp in state.all_sp:
+		pass
 
-	# TODO Environment grazing (determine ordering of who eats first by size)
+	# Environment grazing (determine ordering of who eats first by size)
+	for sp in sorted(state.all_sp, key=lambda x: x.stats["size"]):
+		eaten_amt = min(sp.food_needed, state.environment.resources)
+		state.environment.resources -= eaten_amt
+		# sp.consume_food(eaten_amt)
+		print(sp.name, "GRAZES FOR", sp.consume_food(eaten_amt), "WORTH OF FOOD")
 
 	# first species 
 	species_to_remove = []
@@ -173,8 +183,8 @@ def execute_turn(state):
 			# Apply population penalty for missing consumption goal
 			consumption_penalty = sp1.use_food() / 2
 
-			sp1.population_size += population_change
 			sp1.population_size -= sp1.population_size * consumption_penalty
+			sp1.population_size += population_change
 
 			if sp1.population_size <= 0:
 				species_to_remove.append(sp1)
@@ -183,12 +193,13 @@ def execute_turn(state):
 	if state.all_sp[state.player_index] in species_to_remove:
 		print('Player species has perished. Game over!')
 		exit(1)
-		pass # TODO
 	
 	# Remove dead species
 	for sp in species_to_remove:
 		state.all_sp.remove(sp)
 
+	# Environment resource regain
+	state.environment.resources += state.environment.resource_gain
 
 	# Print execution time
 	time_diff = floor(time() - start_time)
@@ -219,11 +230,11 @@ def execute_turn(state):
 		penalties["speed"] = max(prey.rand_sized_stat("speed") - predator.rand_sized_stat("speed"), 0)
 		penalties["defense"] = max(prey.rand_sized_stat("defense") - predator.rand_sized_stat("attack"), 0)
 
-		# Calculate total overall penalty 
+		# Calculate total overall penalty
 		# TODO Will need testing and adjusting
 		total_penalty = 0
 		for _, penalty in penalties.items():
-			total_penalty = penalty + total_penalty
+			total_penalty = (penalty * 10) + total_penalty
 
 		# Reduce prey population, adjusted by penalty for failing checks and size, to represent hunting
 		# Put cap on individuals hunted relative to amount of food needed by predators

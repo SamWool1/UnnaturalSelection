@@ -545,8 +545,9 @@ class Species(object):
 
     # Adds to food consumed this turn, negatively modified by consumption rate (size for now)
     def consume_food(self, food_amt):
-        self.food_consumed = self.food_consumed + \
-            (food_amt / self.stats["size"])
+        food_eaten = self.food_consumed + (food_amt / self.stats["size"])
+        self.food_consumed -= food_eaten
+        return food_eaten
 
     # Resets food consumed and adds appropriate evo points, returns a penalty (% of needed not reached)
     def use_food(self):
