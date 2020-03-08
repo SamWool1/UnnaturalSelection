@@ -475,7 +475,7 @@ class Species(object):
     consumption_rate = 1.  # Determines food needed + evo points gained
     traits = set([])  # List of traits for this species
     food_consumed = 0.  # How much food has been consumed this turn
-    food_needed = 100.  # How much food is needed
+    # food_needed = 1.  # How much food is needed
     evo_points = 0  # How many points a species has to evolve
     name = ""
 
@@ -551,7 +551,8 @@ class Species(object):
 
     # Resets food consumed and adds appropriate evo points, returns a penalty (% of needed not reached)
     def use_food(self):
-        penalty = max((self.food_consumed - self.food_needed) / 100, 0)
+        food_needed = self.consumption_rate * self.population_size
+        penalty = max((self.food_consumed - food_needed) / 100, 0)
         # TODO "3" used for testing, determine if appropriate for final
         self.evo_points += (int(3 * self.stats["size"])) - (penalty * self.stats["size"])
         self.food_consumed = 0

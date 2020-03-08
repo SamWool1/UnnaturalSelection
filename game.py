@@ -153,10 +153,10 @@ def execute_turn(state):
 
 	# Environment grazing (determine ordering of who eats first by size)
 	for sp in sorted(state.all_sp, key=lambda x: x.stats["size"]):
-		eaten_amt = min(sp.food_needed, state.environment.resources)
+		eaten_amt = min(sp.consumption_rate * sp.population_size, state.environment.resources)
 		state.environment.resources -= eaten_amt
 		# sp.consume_food(eaten_amt)
-		print(sp.name, "GRAZES FOR", sp.consume_food(eaten_amt), "WORTH OF FOOD")
+		print(sp.name, "GRAZES FOR", int(sp.consume_food(eaten_amt)), "WORTH OF FOOD")
 
 	# first species 
 	species_to_remove = []
