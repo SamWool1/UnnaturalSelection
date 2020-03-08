@@ -81,12 +81,14 @@ def read_input(state):
 	print("Your evolution options: ")
 	for ev in possible_evolutions:
 		print("Evolution: ", ev)
-		print("    Cost: ", traits[ev]["cost"])
-		print("    Stats: ", traits[ev]["stats"])
+		# print("    Cost: ", traits[ev]["cost"])
+		# print("    Stats: ", traits[ev]["stats"])
+		print("    Cost: ", traits[ev]["cost"], "| Stats: ", traits[ev]["stats"])
+	print("Points available:", state.all_sp[0].evo_points)
 
 	while possible_evolutions:
-		read = input("Choose an evolution for species or type 'quit' to quit: ")
-		if read in possible_evolutions or read == "quit":
+		read = input("Choose an evolution for species or type 'quit' to quit ('none' for no evolution): ")
+		if read in possible_evolutions or read == "quit" or read == "none":
 			return read
 		else:
 			print()
@@ -141,9 +143,14 @@ def execute_turn(state):
 	start_time = time()
 
 	#Lotka Volterra competition model, works only for competition between two species right now
+	# TODO Species hunting
+
+	# TODO Environment grazing (determine ordering of who eats first by size)
 
 	# first species 
+	species_to_remove = []
 	for sp1 in state.all_sp:
+		# Calculate base population change
 		growth_rate = ( sp1.stats['birthrate'] - sp1.stats['deathrate'] ) / sp1.population_size
 		# temporary formula for carrying capcity(?)... should find what works best later
 		carrying_capacity = state.environment.resources / sp1.consumption_rate 
@@ -162,7 +169,23 @@ def execute_turn(state):
 			print("dN/dt: " , population_change)
 			'''
 
+			# Apply population penalty for missing consumption goal
+			consumption_penalty = sp1.use_food()
+			print('CONS PEN', consumption_penalty)
+
 			sp1.population_size += population_change
+			sp1.population_size = sp1.population_size * (min(consumption_penalty, 1) / 2)
+			if sp1.population_size < 0:
+				species_to_remove.append(sp1)
+	
+	# TODO End game with player loss
+	if state.all_sp[0] in species_to_remove:
+		pass
+	
+	# Remove dead species
+	for sp in species_to_remove:
+		state.all_sp.remove(sp)
+
 
 	# Print execution time
 	time_diff = floor(time() - start_time)

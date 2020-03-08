@@ -471,6 +471,9 @@ class Species(object):
     population_size = 0
     consumption_rate = 1.  # Determines food needed + evo points gained
     traits = set([])  # List of traits for this species
+    food_consumed = 0. # How much food has been consumed this turn
+    food_needed = 100. # How much food is needed
+    evo_points = 0 # How many points a species has to evolve
 
     def __init__(self, initial_traits, initial_pop_size, initial_cons_rate):
         self.stats = {
@@ -499,7 +502,11 @@ class Species(object):
 
     # Functions to modify this species
     # Add a trait and modify species according to what the trait is
+    # TODO Check for cost, return False if cost > evo points, else adjust evo points
     def add_trait(self, trait):
+        if trait == "none":
+            return True
+
         mod_stats = traits[trait]['stats']
 
         for stat in self.stats:
@@ -507,6 +514,7 @@ class Species(object):
                 self.stats[stat] = sum(d[stat] for d in [self.stats, mod_stats])
 
         self.traits.add(trait)
+        return True
 
     # Returns {stat} * size, or -1 if {stat} invalid
     # If invert is true, stat's correlation to size is inverse (i.e. size goes up, stat goes down)
@@ -522,5 +530,17 @@ class Species(object):
     # Returns sized stat * random number between 0 and 1
     def rand_sized_stat(self, stat, invert=False):
         return self.sized_stat(stat, invert) * random.random()
+
+    # Adds to food consumed this turn, negatively modified by consumption rate (size for now)
+    def consume_food(self, food_amt):
+        self.food_consumed = self.food_consumed + (food_amt / self.stats["size"])
+    
+    # Resets food consumed and adds appropriate evo points, returns a penalty (% of needed not reached)
+    def use_food(self):
+        penalty = max((self.food_needed - self.food_consumed) / 100, 0)
+        # TODO "1" used for testing, determine if appropriate for final
+        self.evo_points = (int(1 * self.stats["size"])) - (penalty * self.stats["size"]) + self.evo_points
+        self.food_consumed = 0
+        return penalty
 
     # TODO: stuff related to evo pts, death/birthrates, changing stats, and more
