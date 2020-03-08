@@ -503,7 +503,7 @@ class Species(object):
 
         for trait in self.traits:
             self.add_trait(trait)
-        
+
         self.name = name
 
     def __repr__(self):
@@ -551,10 +551,9 @@ class Species(object):
 
     # Resets food consumed and adds appropriate evo points, returns a penalty (% of needed not reached)
     def use_food(self):
-        penalty = max((self.food_needed - self.food_consumed) / 100, 0)
-        # TODO "1" used for testing, determine if appropriate for final
-        self.evo_points = (
-            int(2 * self.stats["size"])) - (penalty * self.stats["size"]) + self.evo_points
+        penalty = max((self.food_consumed - self.food_needed) / 100, 0)
+        # TODO "3" used for testing, determine if appropriate for final
+        self.evo_points += (int(3 * self.stats["size"])) - (penalty * self.stats["size"])
         self.food_consumed = 0
         return penalty
 
