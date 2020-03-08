@@ -2,8 +2,9 @@
 import json
 import copy
 import random
+import string
 
-#a dictionary of traits
+# a dictionary of traits
 traits = {
     "arms": {
         "stats": {
@@ -12,7 +13,7 @@ traits = {
             "stealth": 1,
             "size": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 2
     },
     "long arms": {
@@ -23,10 +24,10 @@ traits = {
             "size": 2
         },
         "requires": set([
-		    "arms"
+            "arms"
         ]),
         "cost": 4
-	},
+    },
     "strong arms": {
         "stats": {
             "attack": 3,
@@ -34,10 +35,10 @@ traits = {
             "size": 1
         },
         "requires": set([
-		    "arms"
+            "arms"
         ]),
         "cost": 4
-	},
+    },
     "legs": {
         "stats": {
             "attack": 1,
@@ -45,7 +46,7 @@ traits = {
             "stealth": 1,
             "size": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 2
     },
     "long legs": {
@@ -57,10 +58,10 @@ traits = {
             "size": 2
         },
         "requires": set([
-		    "legs"
+            "legs"
         ]),
         "cost": 4
-	},
+    },
     "strong legs": {
         "stats": {
             "attack": 2,
@@ -70,22 +71,22 @@ traits = {
             "size": 1
         },
         "requires": set([
-		    "legs"
+            "legs"
         ]),
         "cost": 4
-	},
+    },
     "mouth": {
         "stats": {
             "attack": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "teeth": {
         "stats": {
             "attack": 2
         },
-		"requires": set([
+        "requires": set([
             "mouth"
         ]),
         "cost": 1
@@ -95,10 +96,10 @@ traits = {
             "attack": 4
         },
         "requires": set([
-		    "teeth"
+            "teeth"
         ]),
         "cost": 2
-	},
+    },
     "poison": {
         "stats": {
             "attack": 4,
@@ -106,13 +107,13 @@ traits = {
         },
         "requires": set([]),
         "cost": 10
-	},
+    },
     "fur": {
         "stats": {
             "defense": 1,
             "stealth": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "thick fur": {
@@ -120,7 +121,7 @@ traits = {
             "defense": 2,
             "stealth": 1
         },
-		"requires": set([
+        "requires": set([
             "fur"
         ]),
         "cost": 2
@@ -129,14 +130,14 @@ traits = {
         "stats": {
             "attack": 2
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "eyes": {
         "stats": {
             "spotting": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "good eyes": {
@@ -144,34 +145,34 @@ traits = {
             "spotting": 2
         },
         "requires": set([
-		    "eyes"
+            "eyes"
         ]),
         "cost": 2
-	},
+    },
     "compound eyes": {
         "stats": {
             "spotting": 10
         },
         "requires": set([
-		    "good eyes"
+            "good eyes"
         ]),
         "cost": 10
-	},
+    },
     "night vision": {
         "stats": {
             "spotting": 5
         },
         "requires": set([
-		    "eyes"
+            "eyes"
         ]),
         "cost": 4
-	},
+    },
     "wings": {
         "stats": {
             "speed": 2,
             "size": 2
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 2
     },
     "strong wings": {
@@ -181,26 +182,26 @@ traits = {
             "size": 3
         },
         "requires": set([
-		    "wings", "feathers"
+            "wings", "feathers"
         ]),
         "cost": 3
-	},
+    },
     "light wings": {
         "stats": {
             "speed": 2,
             "stealth": 2
         },
         "requires": set([
-		    "wings"
+            "wings"
         ]),
         "cost": 3
-	},
+    },
     "shell": {
         "stats": {
             "defense": 2,
             "size": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "hard shell": {
@@ -208,15 +209,15 @@ traits = {
             "defense": 4
         },
         "requires": set([
-		    "shell"
+            "shell"
         ]),
         "cost": 2
-	},
+    },
     "claws": {
         "stats": {
             "attack": 2
         },
-		"requires": set([
+        "requires": set([
             "arms"
         ]),
         "cost": 1
@@ -226,22 +227,22 @@ traits = {
             "attack": 4
         },
         "requires": set([
-		    "claws"
+            "claws"
         ]),
         "cost": 2
-	},
+    },
     "camouflage": {
         "stats": {
             "stealth": 3
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 2
     },
     "changable camouflage": {
         "stats": {
             "stealth": 5
         },
-		"requires": set([
+        "requires": set([
             "camouflage"
         ]),
         "cost": 5
@@ -250,14 +251,14 @@ traits = {
         "stats": {
             "stealth": 2
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "ears": {
         "stats": {
             "spotting": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "good ears": {
@@ -265,30 +266,30 @@ traits = {
             "spotting": 2
         },
         "requires": set([
-		    "ears"
+            "ears"
         ]),
         "cost": 2
-	},
+    },
     "tail": {
         "stats": {
             "speed": 1,
             "stealth": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 2
     },
     "nose": {
         "stats": {
             "spotting": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "good nose": {
         "stats": {
             "spotting": 3
         },
-		"requires": set([
+        "requires": set([
             "nose"
         ]),
         "cost": 2
@@ -297,14 +298,14 @@ traits = {
         "stats": {
             "spotting": 2
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "tough skin": {
         "stats": {
             "defense": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "super tough skin": {
@@ -312,16 +313,16 @@ traits = {
             "defense": 3
         },
         "requires": set([
-		    "tough skin"
+            "tough skin"
         ]),
         "cost": 2
-	},
+    },
     "feathers": {
         "stats": {
             "defense": 1,
             "speed": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 1
     },
     "pretty feathers": {
@@ -329,64 +330,64 @@ traits = {
             "birthrate": 2
         },
         "requires": set([
-		    "feathers"
+            "feathers"
         ]),
         "cost": 5
-	},
+    },
     "gorgeous feathers": {
         "stats": {
             "stealth": -2,
             "birthrate": 5
         },
         "requires": set([
-		    "pretty feathers"
+            "pretty feathers"
         ]),
         "cost": 5
-	},
+    },
     "fluffy feathers": {
         "stats": {
             "defense": 2
         },
         "requires": set([
-		    "feathers"
+            "feathers"
         ]),
         "cost": 3
-	},
+    },
     "ultra fluffy feathers": {
         "stats": {
             "defense": 1,
             "stealth": 2,
         },
         "requires": set([
-		    "fluffy feathers"
+            "fluffy feathers"
         ]),
         "cost": 5
-	},
+    },
     "sleek feathers": {
         "stats": {
             "speed": 4
         },
         "requires": set([
-		    "feathers"
+            "feathers"
         ]),
         "cost": 5
-	},
+    },
     "echolocation": {
         "stats": {
             "spotting": 5
         },
         "requires": set([
-		    "ears", "mouth"
+            "ears", "mouth"
         ]),
         "cost": 5
-	},
+    },
     "scales": {
         "stats": {
             "defense": 1,
             "speed": 1,
             "stealth": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 2
     },
     "pretty scales": {
@@ -395,7 +396,7 @@ traits = {
             "stealth": -1,
             "birthrate": 2
         },
-		"requires": set([
+        "requires": set([
             "scales"
         ]),
         "cost": 5
@@ -405,7 +406,7 @@ traits = {
             "attack": 1,
             "defense": 1,
         },
-		"requires": set([
+        "requires": set([
             "arms", "legs"
         ]),
         "cost": 1
@@ -415,7 +416,7 @@ traits = {
             "attack": 3,
             "size": 1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 5
     },
     "whiskers": {
@@ -423,7 +424,7 @@ traits = {
             "stealth": 1,
             "spotting": 1
         },
-		"requires": set([
+        "requires": set([
             "fur"
         ]),
         "cost": 1
@@ -433,7 +434,7 @@ traits = {
             "stealth": -5,
             "birthrate": 10
         },
-		"requires": set([
+        "requires": set([
             "mouth"
         ]),
         "cost": 5
@@ -442,9 +443,9 @@ traits = {
         "stats": {
             "deathrate": -1
         },
-		"requires": set([]),
+        "requires": set([]),
         "cost": 5
-    }   
+    }
 }
 """
 overpowered trait used for testing purposes
@@ -465,17 +466,25 @@ overpowered trait used for testing purposes
 """
 
 # Basic skeleton for Species class - feel free to modify as needed
+
+
 class Species(object):
     # Stats and data on this species
     stats = {}  # Species stats
     population_size = 0
     consumption_rate = 1.  # Determines food needed + evo points gained
     traits = set([])  # List of traits for this species
-    food_consumed = 0. # How much food has been consumed this turn
-    food_needed = 100. # How much food is needed
-    evo_points = 0 # How many points a species has to evolve
+    food_consumed = 0.  # How much food has been consumed this turn
+    food_needed = 100.  # How much food is needed
+    evo_points = 0  # How many points a species has to evolve
+    name = ""
 
-    def __init__(self, initial_traits, initial_pop_size, initial_cons_rate):
+    # Thanks to https://pynative.com/python-generate-random-string/
+    def random_name(stringLength=10):
+        letters = string.ascii_lowercase
+        return ''.join(random.choice(letters) for i in range(stringLength))
+
+    def __init__(self, initial_traits, initial_pop_size, initial_cons_rate, name=random_name()):
         self.stats = {
             "attack": 1.,
             "defense": 1.,
@@ -485,20 +494,22 @@ class Species(object):
             "birthrate": 20.,  # might not default to 1. in future
             "deathrate": 10.,  # same as above
             "spotting": 1.,
-        } # This species' stats. Default to 1.
+        }  # This species' stats. Default to 1.
 
         self.traits = set([])
 
         self.population_size = initial_pop_size
         self.consumption_rate = initial_cons_rate
-        
+
         for trait in self.traits:
             self.add_trait(trait)
+        
+        self.name = name
 
     def __repr__(self):
         # method for string representing the species
 
-        return ' '.join(["[", "Population:", str(self.population_size), ", Stats:", str(self.stats),  "]"])
+        return ' '.join(["[", "Name:", self.name + ";", "Population:", str(self.population_size), ", Stats:", str(self.stats),  "]"])
 
     # Functions to modify this species
     # Add a trait and modify species according to what the trait is
@@ -511,7 +522,8 @@ class Species(object):
 
         for stat in self.stats:
             if stat in mod_stats:
-                self.stats[stat] = sum(d[stat] for d in [self.stats, mod_stats])
+                self.stats[stat] = sum(d[stat]
+                                       for d in [self.stats, mod_stats])
 
         self.traits.add(trait)
         return True
@@ -533,13 +545,15 @@ class Species(object):
 
     # Adds to food consumed this turn, negatively modified by consumption rate (size for now)
     def consume_food(self, food_amt):
-        self.food_consumed = self.food_consumed + (food_amt / self.stats["size"])
-    
+        self.food_consumed = self.food_consumed + \
+            (food_amt / self.stats["size"])
+
     # Resets food consumed and adds appropriate evo points, returns a penalty (% of needed not reached)
     def use_food(self):
         penalty = max((self.food_needed - self.food_consumed) / 100, 0)
         # TODO "1" used for testing, determine if appropriate for final
-        self.evo_points = (int(1 * self.stats["size"])) - (penalty * self.stats["size"]) + self.evo_points
+        self.evo_points = (
+            int(2 * self.stats["size"])) - (penalty * self.stats["size"]) + self.evo_points
         self.food_consumed = 0
         return penalty
 

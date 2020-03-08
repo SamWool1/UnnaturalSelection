@@ -18,13 +18,14 @@ class GameState(object):
 
 		#self.all_sp = [Species([], 100, 2), Species([], 100, 1)]
 		self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
+		self.player_index = 0
 
 		print()
 
 
 	def initialize_player(self):
 		# Should hold logic for player-controlled species initialization
-		sp_player = Species([], 100, 2)
+		sp_player = Species([], 100, 2, "Player's species")
 		print("Created player species: ", sp_player)
 		return sp_player
 
@@ -170,17 +171,19 @@ def execute_turn(state):
 			'''
 
 			# Apply population penalty for missing consumption goal
-			consumption_penalty = sp1.use_food()
-			print('CONS PEN', consumption_penalty)
+			consumption_penalty = sp1.use_food() / 2
 
 			sp1.population_size += population_change
-			sp1.population_size = sp1.population_size * (min(consumption_penalty, 1) / 2)
-			if sp1.population_size < 0:
+			sp1.population_size -= sp1.population_size * consumption_penalty
+
+			if sp1.population_size <= 0:
 				species_to_remove.append(sp1)
 	
-	# TODO End game with player loss
-	if state.all_sp[0] in species_to_remove:
-		pass
+	# End game with player loss
+	if state.all_sp[state.player_index] in species_to_remove:
+		print('Player species has perished. Game over!')
+		exit(1)
+		pass # TODO
 	
 	# Remove dead species
 	for sp in species_to_remove:
@@ -223,11 +226,12 @@ def execute_turn(state):
 			total_penalty = penalty + total_penalty
 
 		# Reduce prey population, adjusted by penalty for failing checks and size, to represent hunting
-		# TODO Put cap on individuals hunted relative to amount of food needed by predators
+		# Put cap on individuals hunted relative to amount of food needed by predators
 		individuals_hunted = max(pred_size_advntg * predator.population_size - total_penalty, 0)
 		prey.population_size = prey.population_size - individuals_hunted
 
-		# TODO Reduce food needed for predator this turn according to number of individuals hunted
+		# Return inds hunted times prey size to represent food obtained
+		return individuals_hunted * prey.stats["size"]
 
 
 
