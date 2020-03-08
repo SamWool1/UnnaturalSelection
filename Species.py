@@ -9,47 +9,85 @@ traits = {
         "stats": {
             "attack": 1,
             "speed": 1,
-            "stealth": 1
+            "stealth": 1,
+            "size": 1
         },
 		"requires": set([]),
-        "cost": 1
+        "cost": 2
     },
     "long arms": {
         "stats": {
             "attack": 2,
             "speed": 1,
-            "stealth": 1
+            "stealth": 1,
+            "size": 2
         },
         "requires": set([
 		    "arms"
         ]),
-        "cost": 2
+        "cost": 4
+	},
+    "strong arms": {
+        "stats": {
+            "attack": 3,
+            "stealth": -1,
+            "size": 1
+        },
+        "requires": set([
+		    "arms"
+        ]),
+        "cost": 4
 	},
     "legs": {
         "stats": {
             "attack": 1,
             "speed": 1,
-            "stealth": 1
+            "stealth": 1,
+            "size": 1
         },
 		"requires": set([]),
-        "cost": 1
+        "cost": 2
     },
     "long legs": {
         "stats": {
             "attack": 1,
-            "speed": 2,
-            "stealth": 1
+            "speed": 3,
+            "stealth": 1,
+            "birthrate": -1,
+            "size": 2
         },
         "requires": set([
 		    "legs"
         ]),
-        "cost": 2
+        "cost": 4
 	},
+    "strong legs": {
+        "stats": {
+            "attack": 2,
+            "speed": 3,
+            "stealth": -2,
+            "birthrate": -1,
+            "size": 1
+        },
+        "requires": set([
+		    "legs"
+        ]),
+        "cost": 4
+	},
+    "mouth": {
+        "stats": {
+            "attack": 1
+        },
+		"requires": set([]),
+        "cost": 1
+    },
     "teeth": {
         "stats": {
             "attack": 2
         },
-		"requires": set([]),
+		"requires": set([
+            "mouth"
+        ]),
         "cost": 1
     },
     "sharp teeth": {
@@ -61,6 +99,14 @@ traits = {
         ]),
         "cost": 2
 	},
+    "poison": {
+        "stats": {
+            "attack": 4,
+            "defense": 1
+        },
+        "requires": set([]),
+        "cost": 10
+	},
     "fur": {
         "stats": {
             "defense": 1,
@@ -68,6 +114,16 @@ traits = {
         },
 		"requires": set([]),
         "cost": 1
+    },
+    "thick fur": {
+        "stats": {
+            "defense": 2,
+            "stealth": 1
+        },
+		"requires": set([
+            "fur"
+        ]),
+        "cost": 2
     },
     "horn": {
         "stats": {
@@ -94,33 +150,55 @@ traits = {
 	},
     "compound eyes": {
         "stats": {
-            "spotting": 4
+            "spotting": 10
+        },
+        "requires": set([
+		    "good eyes"
+        ]),
+        "cost": 10
+	},
+    "night vision": {
+        "stats": {
+            "spotting": 5
         },
         "requires": set([
 		    "eyes"
         ]),
-        "cost": 3
+        "cost": 4
 	},
     "wings": {
         "stats": {
-            "speed": 2
+            "speed": 2,
+            "size": 2
         },
 		"requires": set([]),
-        "cost": 1
+        "cost": 2
     },
-    "good wings": {
+    "strong wings": {
         "stats": {
             "speed": 3,
-            "stealth": 1
+            "stealth": 1,
+            "size": 3
+        },
+        "requires": set([
+		    "wings", "feathers"
+        ]),
+        "cost": 3
+	},
+    "light wings": {
+        "stats": {
+            "speed": 2,
+            "stealth": 2
         },
         "requires": set([
 		    "wings"
         ]),
-        "cost": 2
+        "cost": 3
 	},
     "shell": {
         "stats": {
-            "defense": 2
+            "defense": 2,
+            "size": 1
         },
 		"requires": set([]),
         "cost": 1
@@ -138,7 +216,9 @@ traits = {
         "stats": {
             "attack": 2
         },
-		"requires": set([]),
+		"requires": set([
+            "arms"
+        ]),
         "cost": 1
     },
     "sharp claws": {
@@ -157,6 +237,22 @@ traits = {
 		"requires": set([]),
         "cost": 2
     },
+    "changable camouflage": {
+        "stats": {
+            "stealth": 5
+        },
+		"requires": set([
+            "camouflage"
+        ]),
+        "cost": 5
+    },
+    "mimicry": {
+        "stats": {
+            "stealth": 2
+        },
+		"requires": set([]),
+        "cost": 1
+    },
     "ears": {
         "stats": {
             "spotting": 1
@@ -172,8 +268,201 @@ traits = {
 		    "ears"
         ]),
         "cost": 2
-	}
+	},
+    "tail": {
+        "stats": {
+            "speed": 1,
+            "stealth": 1
+        },
+		"requires": set([]),
+        "cost": 2
+    },
+    "nose": {
+        "stats": {
+            "spotting": 1
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "good nose": {
+        "stats": {
+            "spotting": 3
+        },
+		"requires": set([
+            "nose"
+        ]),
+        "cost": 2
+    },
+    "antenna": {
+        "stats": {
+            "spotting": 2
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "tough skin": {
+        "stats": {
+            "defense": 1
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "super tough skin": {
+        "stats": {
+            "defense": 3
+        },
+        "requires": set([
+		    "tough skin"
+        ]),
+        "cost": 2
+	},
+    "feathers": {
+        "stats": {
+            "defense": 1,
+            "speed": 1
+        },
+		"requires": set([]),
+        "cost": 1
+    },
+    "pretty feathers": {
+        "stats": {
+            "birthrate": 2
+        },
+        "requires": set([
+		    "feathers"
+        ]),
+        "cost": 5
+	},
+    "gorgeous feathers": {
+        "stats": {
+            "stealth": -2,
+            "birthrate": 5
+        },
+        "requires": set([
+		    "pretty feathers"
+        ]),
+        "cost": 5
+	},
+    "fluffy feathers": {
+        "stats": {
+            "defense": 2
+        },
+        "requires": set([
+		    "feathers"
+        ]),
+        "cost": 3
+	},
+    "ultra fluffy feathers": {
+        "stats": {
+            "defense": 1,
+            "stealth": 2,
+        },
+        "requires": set([
+		    "fluffy feathers"
+        ]),
+        "cost": 5
+	},
+    "sleek feathers": {
+        "stats": {
+            "speed": 4
+        },
+        "requires": set([
+		    "feathers"
+        ]),
+        "cost": 5
+	},
+    "echolocation": {
+        "stats": {
+            "spotting": 5
+        },
+        "requires": set([
+		    "ears", "mouth"
+        ]),
+        "cost": 5
+	},
+    "scales": {
+        "stats": {
+            "defense": 1,
+            "speed": 1,
+            "stealth": 1
+        },
+		"requires": set([]),
+        "cost": 2
+    },
+    "pretty scales": {
+        "stats": {
+            "defense": 1,
+            "stealth": -1,
+            "birthrate": 2
+        },
+		"requires": set([
+            "scales"
+        ]),
+        "cost": 5
+    },
+    "nails": {
+        "stats": {
+            "attack": 1,
+            "defense": 1,
+        },
+		"requires": set([
+            "arms", "legs"
+        ]),
+        "cost": 1
+    },
+    "stinger": {
+        "stats": {
+            "attack": 3,
+            "size": 1
+        },
+		"requires": set([]),
+        "cost": 5
+    },
+    "whiskers": {
+        "stats": {
+            "stealth": 1,
+            "spotting": 1
+        },
+		"requires": set([
+            "fur"
+        ]),
+        "cost": 1
+    },
+    "mating call": {
+        "stats": {
+            "stealth": -5,
+            "birthrate": 10
+        },
+		"requires": set([
+            "mouth"
+        ]),
+        "cost": 5
+    },
+    "hibernate": {
+        "stats": {
+            "deathrate": -1
+        },
+		"requires": set([]),
+        "cost": 5
+    }   
 }
+"""
+overpowered trait used for testing purposes
+    "super saiyan": {
+        "stats": {
+            "attack": 100,
+            "defense": 100,
+            "speed": 100,
+            "stealth": 100,
+            "size": 100,
+            "birthrate": 100,
+            "deathrate": -100,
+            "spotting": 100
+        },
+        "requires": set([]),
+        "cost": 1
+	}
+"""
 
 # Basic skeleton for Species class - feel free to modify as needed
 class Species(object):

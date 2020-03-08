@@ -217,7 +217,7 @@ def print_results():
 
 if __name__ == "__main__":
 	state = GameState()
-	max_turn = 5
+	max_turn = 10
 	cur_turn = 0
 
 	while not state.is_over() and cur_turn < max_turn:
