@@ -183,8 +183,8 @@ def execute_turn(state):
 			# Apply population penalty for missing consumption goal
 			consumption_penalty = sp1.use_food() / 2
 
-			sp1.population_size -= sp1.population_size * consumption_penalty
-			sp1.population_size += population_change
+			sp1.population_size -= floor(sp1.population_size * consumption_penalty)
+			sp1.population_size += floor(population_change)
 
 			if sp1.population_size <= 0:
 				species_to_remove.append(sp1)
@@ -210,6 +210,10 @@ def execute_turn(state):
 
 	
 	# Determines outcome of a species encountering and hunting another
+	#
+	# TODO: Modify to look through species array, determine a single prey species
+	# which it can "hunt", dependent upon their attack power relative to the potential
+	# prey species attack power
 	def species_encounter(species_a, species_b):
 		# Determine predator and prey
 		predator, prey = None, None
