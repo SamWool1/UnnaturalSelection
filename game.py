@@ -47,7 +47,15 @@ class GameState(object):
 		# Should return whether or not a game is over or not, dependent upon
 		# whether or completion conditions have been met
 		#print("is_over() is not implemented")
-		pass
+
+		maxSp = max(self.all_sp, key = lambda sp: sp.population_size)
+		self.winner = maxSp
+
+		for sp1 in self.all_sp:
+			if maxSp.population_size < 100 + sp1.population_size:
+				return False
+		
+		return True
 
 	def display_player_choices(self):
 		# Should display the current state of the player species, how many evolution
@@ -107,7 +115,7 @@ def evolutions(species):
 	#filter through traits to get what the species doesnt already have, what the species can afford, and what the species has all the requirements for
 	evolutions = list(
 		filter(lambda trait: traits[trait]['requires'].issubset(species.traits), 
-			filter(lambda trait: traits[trait]['cost'] <= species.population_size, 
+			filter(lambda trait: traits[trait]['cost'] <= species.evo_points, 
 				filter(lambda trait: trait not in species.traits, traits.keys()))))
 
 	#print("possible evolutions:", evolutions)
@@ -163,31 +171,49 @@ def execute_turn(state):
 	for sp1 in state.all_sp:
 		# Calculate base population change
 		growth_rate = ( sp1.stats['birthrate'] - sp1.stats['deathrate'] ) / sp1.population_size
-		# temporary formula for carrying capcity(?)... should find what works best later
-		carrying_capacity = state.environment.resources / sp1.consumption_rate 
 
-		# second species to compete with
+		#sum of competing species competition stats
+		competition_denominator = 0
+
+		#sum of population of competitotrs
+		competitors_population = 0
+
+		#amount of food gained from hunting
+		hunted_food = 0
+
+		# find species to compete with
 		for sp2 in filter(lambda sp: sp != sp1, state.all_sp):
-			# temporary formula for constant... should find what works best later
-			competition_constant = sp1.stats['speed'] * (sp1.stats['attack'] + sp1.stats['defense']) / ( sp2.stats['speed'] * (sp2.stats['attack'] + sp2.stats['defense']) )
+
+			#hunted_food += species_encounter(sp1, sp2)
+
+			competition_denominator += sp2.stats['speed'] * (sp2.stats['attack'] + sp2.stats['defense'])
 			
-			# dN1/dt = (r * N1) * (1 - (N1 + c * N2) / K)
-			population_change = (growth_rate) * sp1.population_size * (1 - (sp1.population_size + competition_constant * sp2.population_size)/carrying_capacity)
+			competitors_population += sp2.population_size
 
-			'''
-			print("c: ", competition_constant)
-			print("K: ", carrying_capacity)
-			print("dN/dt: " , population_change)
-			'''
 
-			# Apply population penalty for missing consumption goal
-			consumption_penalty = sp1.use_food() / 2
+		# formula for carrying capcity , modify as needed
+		carrying_capacity = (state.environment.resources + hunted_food) / sp1.consumption_rate 
 
-			sp1.population_size -= floor(sp1.population_size * consumption_penalty)
-			sp1.population_size += floor(population_change)
+		# formula for competition constant , modify as needed
+		competition_constant = sp1.stats['speed'] * (sp1.stats['attack'] + sp1.stats['defense']) / ( competition_denominator )
+		
+		# dN1/dt = (r * N1) * (1 - (N1 + c * N2) / K)
+		population_change = (growth_rate) * sp1.population_size * (1 - (sp1.population_size + competition_constant * competitors_population)/carrying_capacity)
 
-			if sp1.population_size <= 0:
-				species_to_remove.append(sp1)
+		'''
+		print("c: ", competition_constant)
+		print("K: ", carrying_capacity)
+		print("dN/dt: " , population_change)
+		'''
+
+		# Apply population penalty for missing consumption goal
+		consumption_penalty = sp1.use_food() / 2
+
+		sp1.population_size -= floor(sp1.population_size * consumption_penalty)
+		sp1.population_size += floor(population_change)
+
+		if sp1.population_size <= 0:
+			species_to_remove.append(sp1)
 	
 	# End game with player loss
 	if state.all_sp[state.player_index] in species_to_remove:
@@ -269,8 +295,9 @@ if __name__ == "__main__":
 		if mod == "quit":
 			break
 
-		# player chooses how to evolve their species
-		evolve_player(state, mod)
+		if mod:
+			# player chooses how to evolve their species
+			evolve_player(state, mod)
 
 		# ai chooses how to evolve their species
 		evolve_ai(state) 
