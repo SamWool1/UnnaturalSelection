@@ -2,6 +2,7 @@
 from Species import Species
 from Species import traits
 from Environment import Environment
+from BT_Nodes import Selector, Sequence, Action, Check
 from random import choice
 from time import time
 from math import floor
@@ -19,6 +20,7 @@ class GameState(object):
 		#self.all_sp = [Species([], 100, 2), Species([], 100, 1)]
 		self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
 		self.player_index = 0
+		self.player = self.all_sp[self.player_index]
 
 		print()
 
@@ -93,8 +95,6 @@ def read_input(state):
 	print("Your evolution options: ")
 	for ev in possible_evolutions:
 		print("Evolution: ", ev)
-		# print("    Cost: ", traits[ev]["cost"])
-		# print("    Stats: ", traits[ev]["stats"])
 		print("    Cost: ", traits[ev]["cost"], "| Stats: ", traits[ev]["stats"])
 	print("Points available:", state.all_sp[0].evo_points)
 
@@ -118,11 +118,31 @@ def evolutions(species):
 			filter(lambda trait: traits[trait]['cost'] <= species.evo_points, 
 				filter(lambda trait: trait not in species.traits, traits.keys()))))
 
-	#print("possible evolutions:", evolutions)
-	#print("current traits: ", species.traits)
-
 	return evolutions
 
+def bt_evolve(state, species):
+	root = Selector(name="Top Level Trait Selection")
+
+	for priority in species.priorities:
+		stat = Sequence(name="Stat " + priority)
+		desirable = Check(is_desirable)
+		evolve = Action(evolve_stat)
+		stat.child_nodes = [desirable, evolve]
+		root.child_nodes.append(stat)
+
+	root.child_nodes.append(Action(no_evolution))
+	root.execute(state, species)
+
+# TODO: Placeholders for necessary logic for BT, for now return True as a default
+#       so that everything will behave nice. May want to extract to a different file
+def is_desirable(state, ai):
+	return True
+
+def evolve_stat(state, ai):
+	return True
+
+def no_evolution(state, ai):
+	return True
 
 def evolve_ai(state):
 	# Should make the evolution choices for the AI controlled species
@@ -131,15 +151,6 @@ def evolve_ai(state):
 	if evolution:
 			state.modify_species(evolution, 1)  # can later implement different evolve functions for different ai species (ex: random evolution, greedy evolution, etc.)
 
-	'''
-	i = 1
-
-	while i < len(state.all_sp):
-		evolution = random_evolve(state.all_sp[i])
-		if evolution:
-			state.modify_species(evolution, i)  # can later implement different evolve functions for different ai species (ex: random evolution, greedy evolution, etc.)
-		i += 1
-		'''
 
 def random_evolve(species):
 	possible_evolutions = evolutions(species)
@@ -274,15 +285,6 @@ def execute_turn(state):
 		# Return inds hunted times prey size to represent food obtained
 		return individuals_hunted * prey.stats["size"]
 
-
-
-def print_results():
-	# Should print the important information about the turn that just occured.
-	# It's possible we want this to occur in execute_turn() and this function
-	# is unnecessary
-	print("Updated species: ", list(map(lambda sp: int(sp.population_size), state.all_sp)))
-	print("")
-
 if __name__ == "__main__":
 	state = GameState()
 	max_turn = 10
@@ -299,14 +301,10 @@ if __name__ == "__main__":
 			# player chooses how to evolve their species
 			evolve_player(state, mod)
 
-		# ai chooses how to evolve their species
-		evolve_ai(state) 
-
 		# a round is played with all the species
-		execute_turn(state)
-
-		# results of the round are printed to the player 
-		print_results()
+		for species in state.all_sp:
+			if species != state.player:
+				bt_evolve(state, species)
 
 		cur_turn += 1
 		print()
