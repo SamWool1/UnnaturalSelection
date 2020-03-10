@@ -471,6 +471,7 @@ overpowered trait used for testing purposes
 class Species(object):
     # Stats and data on this species
     stats = {}  # Species stats
+    priorities = []
     population_size = 0
     consumption_rate = 1.  # Determines food needed + evo points gained
     traits = set([])  # List of traits for this species
@@ -495,6 +496,10 @@ class Species(object):
             "deathrate": 10.,  # same as above
             "spotting": 1.,
         }  # This species' stats. Default to 1.
+
+        # Create priorities from shuffle of all stats
+        self.priorities = list(self.stats.keys())
+        random.shuffle(self.priorities)
 
         self.traits = set([])
 
