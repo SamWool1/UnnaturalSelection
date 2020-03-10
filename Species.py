@@ -477,8 +477,11 @@ class Species(object):
     traits = set([])  # List of traits for this species
     food_consumed = 0.  # How much food has been consumed this turn
     # food_needed = 1.  # How much food is needed
-    evo_points = 0  # How many points a species has to evolve
+    evo_points = 10  # How many points a species has to evolve
     name = ""
+
+    # BT bot stuff
+    curr_stat = -1
 
     # Thanks to https://pynative.com/python-generate-random-string/
     def random_name(stringLength=10):
@@ -531,6 +534,7 @@ class Species(object):
                                        for d in [self.stats, mod_stats])
 
         self.traits.add(trait)
+        print('HELLO WORLD')
         return True
 
     # Returns {stat} * size, or -1 if {stat} invalid

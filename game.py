@@ -121,6 +121,7 @@ def evolutions(species):
 	return evolutions
 
 def bt_evolve(state, species):
+	species.curr_stat = -1
 	root = Selector(name="Top Level Trait Selection")
 
 	for priority in species.priorities:
@@ -136,12 +137,39 @@ def bt_evolve(state, species):
 # TODO: Placeholders for necessary logic for BT, for now return True as a default
 #       so that everything will behave nice. May want to extract to a different file
 def is_desirable(state, ai):
-	return True
+	num_sp = len(state.all_sp)
+	num_loss = 0
+	total_loss_mag = 0
+	avg_loss_mag = 0
+
+	ai.curr_stat += 1
+	stat = ai.priorities[ai.curr_stat]
+	for other in state.all_sp:
+		if other == ai:
+			continue
+		if ai.stats[stat] < other.stats[stat]:
+			num_loss += 1
+			total_loss_mag += other.stats[stat] - ai.stats[stat]
+
+
+	# Perform check
+	if num_loss != 0:
+		avg_loss_mag = total_loss_mag / num_loss
+	# print("STAT:", stat, "LOSS MAG:", avg_loss_mag, "TOTAL LEN:", num_sp, "NUM LOSS:", num_loss) 
+
+	MAG_THRESHOLD = 3 # Adjust if needed
+	mag_check = avg_loss_mag > MAG_THRESHOLD
+	loss_check = (num_sp/4) < num_loss < ((3*num_sp)/4)
+
+	result = not (loss_check and mag_check) # Change to 'or' if needed
+	# print("RESULT:", result)
+	return result
 
 def evolve_stat(state, ai):
 	return True
 
 def no_evolution(state, ai):
+	ai.curr_stat += 1
 	return True
 
 def evolve_ai(state):
