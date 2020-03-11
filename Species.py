@@ -471,13 +471,17 @@ overpowered trait used for testing purposes
 class Species(object):
     # Stats and data on this species
     stats = {}  # Species stats
+    priorities = []
     population_size = 0
     consumption_rate = 1.  # Determines food needed + evo points gained
     traits = set([])  # List of traits for this species
     food_consumed = 0.  # How much food has been consumed this turn
     # food_needed = 1.  # How much food is needed
-    evo_points = 0  # How many points a species has to evolve
+    evo_points = 10  # How many points a species has to evolve
     name = ""
+
+    # BT bot stuff
+    curr_stat = -1
 
     # Thanks to https://pynative.com/python-generate-random-string/
     def random_name(stringLength=10):
@@ -495,6 +499,10 @@ class Species(object):
             "deathrate": 10.,  # same as above
             "spotting": 1.,
         }  # This species' stats. Default to 1.
+
+        # Create priorities from shuffle of all stats
+        self.priorities = list(self.stats.keys())
+        random.shuffle(self.priorities)
 
         self.traits = set([])
 
@@ -517,16 +525,19 @@ class Species(object):
     def add_trait(self, trait):
         if trait == "none":
             return True
+        elif traits[trait]["cost"] > self.evo_points:
+            return False
+        else:
+            mod_stats = traits[trait]['stats']
 
-        mod_stats = traits[trait]['stats']
+            for stat in self.stats:
+                if stat in mod_stats:
+                    self.stats[stat] = sum(d[stat]
+                                           for d in [self.stats, mod_stats])
 
-        for stat in self.stats:
-            if stat in mod_stats:
-                self.stats[stat] = sum(d[stat]
-                                       for d in [self.stats, mod_stats])
-
-        self.traits.add(trait)
-        return True
+            self.traits.add(trait)
+            self.evo_points -= traits[trait]["cost"]
+            return True
 
     # Returns {stat} * size, or -1 if {stat} invalid
     # If invert is true, stat's correlation to size is inverse (i.e. size goes up, stat goes down)

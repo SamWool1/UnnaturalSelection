@@ -2,6 +2,7 @@
 from Species import Species
 from Species import traits
 from Environment import Environment
+from BT_Nodes import Selector, Sequence, Action, Check
 from random import choice
 from time import time
 from math import floor
@@ -19,6 +20,7 @@ class GameState(object):
 		#self.all_sp = [Species([], 100, 2), Species([], 100, 1)]
 		self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
 		self.player_index = 0
+		self.player = self.all_sp[self.player_index]
 
 		print()
 
@@ -93,8 +95,6 @@ def read_input(state):
 	print("Your evolution options: ")
 	for ev in possible_evolutions:
 		print("Evolution: ", ev)
-		# print("    Cost: ", traits[ev]["cost"])
-		# print("    Stats: ", traits[ev]["stats"])
 		print("    Cost: ", traits[ev]["cost"], "| Stats: ", traits[ev]["stats"])
 	print("Points available:", state.all_sp[0].evo_points)
 
@@ -118,11 +118,82 @@ def evolutions(species):
 			filter(lambda trait: traits[trait]['cost'] <= species.evo_points, 
 				filter(lambda trait: trait not in species.traits, traits.keys()))))
 
-	#print("possible evolutions:", evolutions)
-	#print("current traits: ", species.traits)
-
 	return evolutions
 
+def bt_evolve(state, species):
+	species.curr_stat = -1
+	root = Selector(name="Top Level Trait Selection")
+
+	for priority in species.priorities:
+		stat = Sequence(name="Stat " + priority)
+		desirable = Check(is_desirable)
+		evolve = Action(evolve_stat)
+		stat.child_nodes = [desirable, evolve]
+		root.child_nodes.append(stat)
+
+	root.child_nodes.append(Action(no_evolution))
+	root.execute(state, species)
+
+# TODO: Placeholders for necessary logic for BT, for now return True as a default
+#       so that everything will behave nice. May want to extract to a different file
+def is_desirable(state, ai):
+	num_sp = len(state.all_sp)
+	num_loss = 0
+	total_loss_mag = 0
+	avg_loss_mag = 0
+
+	ai.curr_stat += 1
+	stat = ai.priorities[ai.curr_stat]
+	for other in state.all_sp:
+		if other == ai:
+			continue
+		if ai.stats[stat] < other.stats[stat]:
+			num_loss += 1
+			total_loss_mag += other.stats[stat] - ai.stats[stat]
+
+
+	# Perform check
+	if num_loss != 0:
+		avg_loss_mag = total_loss_mag / num_loss
+	# print("STAT:", stat, "LOSS MAG:", avg_loss_mag, "TOTAL LEN:", num_sp, "NUM LOSS:", num_loss) 
+
+	MAG_THRESHOLD = 3 # Adjust if needed
+	mag_check = avg_loss_mag > MAG_THRESHOLD
+	loss_check = (num_sp/4) < num_loss < ((3*num_sp)/4)
+
+	result = not (loss_check and mag_check) # Change to 'or' if needed
+	# print("RESULT:", result)
+	return result
+
+def evolve_stat(state, ai):
+	desired_stat = ai.priorities[ai.curr_stat]
+	possible_evo_all = evolutions(species)
+
+	possible_evo = {}
+	for evo in possible_evo_all:
+		if desired_stat in traits[evo]['stats']:
+			possible_evo[evo] = traits[evo]
+
+	print('WANT:', desired_stat)
+	print('OPTIONS:', possible_evo)
+
+	poss_evo_len = len(possible_evo)
+
+	for _ in range(0, poss_evo_len):
+		# Find best possible trait ignoring cost
+		trait, stats = max(possible_evo.items(), key=lambda x: x[1]['stats'][desired_stat])
+		print('TRY:', trait, stats)
+		possible_evo.pop(trait)
+
+		# Try to buy
+		if ai.add_trait(trait):
+			return True
+
+	return False
+
+def no_evolution(state, ai):
+	ai.curr_stat += 1
+	return True
 
 def evolve_ai(state):
 	# Should make the evolution choices for the AI controlled species
@@ -131,15 +202,6 @@ def evolve_ai(state):
 	if evolution:
 			state.modify_species(evolution, 1)  # can later implement different evolve functions for different ai species (ex: random evolution, greedy evolution, etc.)
 
-	'''
-	i = 1
-
-	while i < len(state.all_sp):
-		evolution = random_evolve(state.all_sp[i])
-		if evolution:
-			state.modify_species(evolution, i)  # can later implement different evolve functions for different ai species (ex: random evolution, greedy evolution, etc.)
-		i += 1
-		'''
 
 def random_evolve(species):
 	possible_evolutions = evolutions(species)
@@ -163,8 +225,8 @@ def execute_turn(state):
 	for sp in sorted(state.all_sp, key=lambda x: x.stats["size"]):
 		eaten_amt = min(sp.consumption_rate * sp.population_size, state.environment.resources)
 		state.environment.resources -= eaten_amt
-		# sp.consume_food(eaten_amt)
-		print(sp.name, "GRAZES FOR", int(sp.consume_food(eaten_amt)), "WORTH OF FOOD")
+		sp.consume_food(eaten_amt)
+		print(sp.name, "GRAZES FOR", eaten_amt, "WORTH OF FOOD")
 
 	# first species 
 	species_to_remove = []
@@ -274,15 +336,6 @@ def execute_turn(state):
 		# Return inds hunted times prey size to represent food obtained
 		return individuals_hunted * prey.stats["size"]
 
-
-
-def print_results():
-	# Should print the important information about the turn that just occured.
-	# It's possible we want this to occur in execute_turn() and this function
-	# is unnecessary
-	print("Updated species: ", list(map(lambda sp: int(sp.population_size), state.all_sp)))
-	print("")
-
 if __name__ == "__main__":
 	state = GameState()
 	max_turn = 10
@@ -299,14 +352,13 @@ if __name__ == "__main__":
 			# player chooses how to evolve their species
 			evolve_player(state, mod)
 
-		# ai chooses how to evolve their species
-		evolve_ai(state) 
+		# ai evolution
+		for species in state.all_sp:
+			if species != state.player:
+				bt_evolve(state, species)
 
 		# a round is played with all the species
 		execute_turn(state)
-
-		# results of the round are printed to the player 
-		print_results()
 
 		cur_turn += 1
 		print()
