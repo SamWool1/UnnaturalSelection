@@ -225,8 +225,8 @@ def execute_turn(state):
 	for sp in sorted(state.all_sp, key=lambda x: x.stats["size"]):
 		eaten_amt = min(sp.consumption_rate * sp.population_size, state.environment.resources)
 		state.environment.resources -= eaten_amt
-		# sp.consume_food(eaten_amt)
-		print(sp.name, "GRAZES FOR", int(sp.consume_food(eaten_amt)), "WORTH OF FOOD")
+		sp.consume_food(eaten_amt)
+		print(sp.name, "GRAZES FOR", eaten_amt, "WORTH OF FOOD")
 
 	# first species 
 	species_to_remove = []
