@@ -9,6 +9,8 @@ class Environment(object):
             gain = food/6 # TODO test and adjust if needed
         self.resource_gain = gain
 
+        
+
     def __repr__(self):
         # method for string representing the environment
 

@@ -3,6 +3,8 @@ import json
 import copy
 import random
 import string
+from math import floor
+
 
 # a dictionary of traits
 traits = {
@@ -509,6 +511,8 @@ class Species(object):
         self.population_size = initial_pop_size
         self.consumption_rate = initial_cons_rate
 
+        self.evo_points = 0
+
         for trait in self.traits:
             self.add_trait(trait)
 
@@ -517,7 +521,7 @@ class Species(object):
     def __repr__(self):
         # method for string representing the species
 
-        return ' '.join(["[", "Name:", self.name + ";", "Population:", str(self.population_size), ", Stats:", str(self.stats),  "]"])
+        return ' '.join(["[", "Name:", self.name + ";", "Population:", str(floor(self.population_size)), ", Stats:", str(self.stats),  "]"])
 
     # Functions to modify this species
     # Add a trait and modify species according to what the trait is

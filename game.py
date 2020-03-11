@@ -24,20 +24,17 @@ class GameState(object):
 
 		print()
 
-
 	def initialize_player(self):
 		# Should hold logic for player-controlled species initialization
-		sp_player = Species([], 100, 2, "Player's species")
+		sp_player = Species([], 100, 1, "Player's species")
 		print("Created player species: ", sp_player)
 		return sp_player
-
 
 	def initialize_species(self, traits, population, consumption):
 		# Should hold logic for species initialization
 		sp = Species(traits, population, consumption)
 		print("Created species: ", sp)
 		return sp
-
 
 	def initialize_environment(self):
 		# Should hold logic for environment initialization
@@ -52,6 +49,9 @@ class GameState(object):
 
 		maxSp = max(self.all_sp, key = lambda sp: sp.population_size)
 		self.winner = maxSp
+
+		if len(self.all_sp) == 1:
+			return True
 
 		for sp1 in self.all_sp:
 			if maxSp.population_size < 100 + sp1.population_size:
@@ -216,11 +216,6 @@ def execute_turn(state):
 	print("Executing Turn...")
 	start_time = time()
 
-	#Lotka Volterra competition model, works only for competition between two species right now
-	# TODO Species hunting
-	for sp in state.all_sp:
-		pass
-
 	# Environment grazing (determine ordering of who eats first by size)
 	for sp in sorted(state.all_sp, key=lambda x: x.stats["size"]):
 		eaten_amt = min(sp.consumption_rate * sp.population_size, state.environment.resources)
@@ -228,33 +223,87 @@ def execute_turn(state):
 		sp.consume_food(eaten_amt)
 		print(sp.name, "GRAZES FOR", eaten_amt, "WORTH OF FOOD")
 
-	# first species 
+
+	# Simulate population changes with Lotka-Volterra Model
+		# Predator-Prey Model: Each species selects random other for prey 
+		# Interspeciic Model: Every species competes for natural resources 
+
 	species_to_remove = []
 	for sp1 in state.all_sp:
+		
 		# Calculate base population change
-		growth_rate = ( sp1.stats['birthrate'] - sp1.stats['deathrate'] ) / sp1.population_size
+		growth_rate = ( sp1.stats['birthrate'] / 100 ) - ( sp1.stats['deathrate'] / 100 )
 
-		#sum of competing species competition stats
+		# list of all species that sp1 can compete with
+		competing_species = list(filter(lambda sp: sp != sp1, state.all_sp))
+
+		# number of sp1 predators fed with prey
+		predators_fed = 0
+
+		''' 
+		Lotka-Volterra Predator-Prey Model : 
+			dN1/dt =  r1 * N1 -  e  * N1N2     
+			dN2/dt = -m2 * N2 + e/c * N1N2 
+				c : capture efficiency 
+		'''
+
+		# Assign predator
+		predator = sp1
+
+		# Determine possible preys
+		pred_rating = predator.rand_sized_stat("attack")
+		preys = list(filter(lambda prey: prey.rand_sized_stat("attack") < pred_rating, competing_species))
+
+		# Choose random prey and hunt
+		if preys:
+			prey = choice(preys)
+
+			# Calculate size advantage
+			pred_size_advntg = predator.stats["size"] / prey.stats["size"]
+
+			# Calculate penalties for stealth, speed, defense checks
+			penalties = {}
+			penalties["stealth"] = predator.rand_sized_stat("spotting", True) - prey.rand_sized_stat("stealth", True)
+			penalties["speed"] = predator.rand_sized_stat("speed") - prey.rand_sized_stat("speed")
+			penalties["defense"] = predator.rand_sized_stat("attack") - prey.rand_sized_stat("defense")
+
+			# Calculate total capture_efficiency
+			# TODO Might need testing and adjusting
+			capture_efficiency = 0
+			for _, penalty in penalties.items():
+				capture_efficiency += penalty 
+			capture_efficiency = (capture_efficiency + pred_size_advntg) / 10000 
+
+			prey_killed = max((capture_efficiency) * prey.population_size * predator.population_size, 0)
+			prey.population_size -= prey_killed
+			predators_fed = prey_killed * prey.stats["size"] / predator.consumption_rate
+
+			if prey_killed > 0:
+				print(predator.name, "hunted for", floor(prey_killed), prey.name)
+				print(prey.name, "fed", floor(predators_fed), "of", predator.name)
+
+
+		'''
+		Lotka-Volterra Interspecific Competition Model : 
+			dN1/dt = (r * N1) * (1 - (N1 + c * N2) / K)
+				c : competition constant
+				K : carrying capacity
+		'''
+
+		# Sum of competing species' competition stats
 		competition_denominator = 0
 
-		#sum of population of competitotrs
+		# Sum of population of competitotrs
 		competitors_population = 0
 
-		#amount of food gained from hunting
-		hunted_food = 0
-
-		# find species to compete with
-		for sp2 in filter(lambda sp: sp != sp1, state.all_sp):
-
-			#hunted_food += species_encounter(sp1, sp2)
+		# Calculate competitors' stats 
+		for sp2 in competing_species:
 
 			competition_denominator += sp2.stats['speed'] * (sp2.stats['attack'] + sp2.stats['defense'])
-			
 			competitors_population += sp2.population_size
 
-
 		# formula for carrying capcity , modify as needed
-		carrying_capacity = (state.environment.resources + hunted_food) / sp1.consumption_rate 
+		carrying_capacity = ( state.environment.resources / sp1.consumption_rate ) + predators_fed
 
 		# formula for competition constant , modify as needed
 		competition_constant = sp1.stats['speed'] * (sp1.stats['attack'] + sp1.stats['defense']) / ( competition_denominator )
@@ -271,10 +320,10 @@ def execute_turn(state):
 		# Apply population penalty for missing consumption goal
 		consumption_penalty = sp1.use_food() / 2
 
-		sp1.population_size -= floor(sp1.population_size * consumption_penalty)
-		sp1.population_size += floor(population_change)
+		sp1.population_size -= sp1.population_size * consumption_penalty
+		sp1.population_size += population_change
 
-		if sp1.population_size <= 0:
+		if sp1.population_size <= 0 or sp2.population_size <= 0:
 			species_to_remove.append(sp1)
 	
 	# End game with player loss
@@ -296,45 +345,12 @@ def execute_turn(state):
 	else:
 		print("Executed in", time_diff, "seconds")
 
-	
-	# Determines outcome of a species encountering and hunting another
-	#
-	# TODO: Modify to look through species array, determine a single prey species
-	# which it can "hunt", dependent upon their attack power relative to the potential
-	# prey species attack power
-	def species_encounter(species_a, species_b):
-		# Determine predator and prey
-		predator, prey = None, None
-		pred_rating_a = species_a.rand_sized_stat("attack")
-		pred_rating_b = species_b.rand_sized_stat("attack")
-
-		if (pred_rating_a < pred_rating_b):
-			prey = species_a
-			predator = species_b
-		else:
-			prey = species_b
-			predator = species_a		
-		pred_size_advntg = predator.stats["size"] / prey.stats["size"]
-
-		# Calculate penalties for stealth, speed, defense checks
-		penalties = {}
-		penalties["stealth"] = max(prey.rand_sized_stat("stealth", True) - predator.rand_sized_stat("spotting", True), 0)
-		penalties["speed"] = max(prey.rand_sized_stat("speed") - predator.rand_sized_stat("speed"), 0)
-		penalties["defense"] = max(prey.rand_sized_stat("defense") - predator.rand_sized_stat("attack"), 0)
-
-		# Calculate total overall penalty
-		# TODO Will need testing and adjusting
-		total_penalty = 0
-		for _, penalty in penalties.items():
-			total_penalty = (penalty * 10) + total_penalty
-
-		# Reduce prey population, adjusted by penalty for failing checks and size, to represent hunting
-		# Put cap on individuals hunted relative to amount of food needed by predators
-		individuals_hunted = max(pred_size_advntg * predator.population_size - total_penalty, 0)
-		prey.population_size = prey.population_size - individuals_hunted
-
-		# Return inds hunted times prey size to represent food obtained
-		return individuals_hunted * prey.stats["size"]
+def print_results():
+	# Should print the important information about the turn that just occured.
+	# It's possible we want this to occur in execute_turn() and this function
+	# is unnecessary
+	print("Updated species: ", list(map(lambda sp: int(floor(sp.population_size)), state.all_sp)))
+	print("")
 
 if __name__ == "__main__":
 	state = GameState()
@@ -363,5 +379,5 @@ if __name__ == "__main__":
 		cur_turn += 1
 		print()
 
-
+	print("Winner: ", state.winner)
 	print("Game over, thanks for playing")
