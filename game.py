@@ -5,7 +5,7 @@ from Environment import Environment
 from BT_Nodes import Selector, Sequence, Action, Check
 from random import choice
 from time import time
-from math import floor
+from math import floor, ceil
 
 class GameState(object):
 	def __init__(self):
@@ -221,7 +221,7 @@ def execute_turn(state):
 		eaten_amt = min(sp.consumption_rate * sp.population_size, state.environment.resources)
 		state.environment.resources -= eaten_amt
 		sp.consume_food(eaten_amt)
-		print(sp.name, "GRAZES FOR", eaten_amt, "WORTH OF FOOD")
+		print(sp.name, "GRAZES FOR", floor(eaten_amt), "WORTH OF FOOD")
 
 
 	# Simulate population changes with Lotka-Volterra Model
@@ -274,13 +274,13 @@ def execute_turn(state):
 				capture_efficiency += penalty 
 			capture_efficiency = (capture_efficiency + pred_size_advntg) / 10000 
 
-			prey_killed = max((capture_efficiency) * prey.population_size * predator.population_size, 0)
+			prey_killed = min(max((capture_efficiency) * prey.population_size * predator.population_size, 0), prey.population_size)
 			prey.population_size -= prey_killed
 			predators_fed = prey_killed * prey.stats["size"] / predator.consumption_rate
 
 			if prey_killed > 0:
-				print(predator.name, "hunted for", floor(prey_killed), prey.name)
-				print(prey.name, "fed", floor(predators_fed), "of", predator.name)
+				print(predator.name, "hunted for", ceil(prey_killed), prey.name)
+				print(prey.name, "fed", ceil(predators_fed), "of", predator.name)
 
 
 		'''
@@ -333,6 +333,7 @@ def execute_turn(state):
 	
 	# Remove dead species
 	for sp in species_to_remove:
+		print(sp.name, "has perished!")
 		state.all_sp.remove(sp)
 
 	# Environment resource regain
