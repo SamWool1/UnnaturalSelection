@@ -186,12 +186,8 @@ def evolve_stat(state, ai):
 		possible_evo.pop(trait)
 
 		# Try to buy
-		# TODO implement stuff to handle evo cost
-		if True:
-			ai.add_trait(trait)
+		if ai.add_trait(trait):
 			return True
-		else:
-			pass
 
 	return False
 

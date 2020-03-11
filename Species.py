@@ -525,16 +525,19 @@ class Species(object):
     def add_trait(self, trait):
         if trait == "none":
             return True
+        elif traits[trait]["cost"] > self.evo_points:
+            return False
+        else:
+            mod_stats = traits[trait]['stats']
 
-        mod_stats = traits[trait]['stats']
+            for stat in self.stats:
+                if stat in mod_stats:
+                    self.stats[stat] = sum(d[stat]
+                                           for d in [self.stats, mod_stats])
 
-        for stat in self.stats:
-            if stat in mod_stats:
-                self.stats[stat] = sum(d[stat]
-                                       for d in [self.stats, mod_stats])
-
-        self.traits.add(trait)
-        return True
+            self.traits.add(trait)
+            self.evo_points -= traits[trait]["cost"]
+            return True
 
     # Returns {stat} * size, or -1 if {stat} invalid
     # If invert is true, stat's correlation to size is inverse (i.e. size goes up, stat goes down)
