@@ -534,7 +534,6 @@ class Species(object):
                                        for d in [self.stats, mod_stats])
 
         self.traits.add(trait)
-        print('HELLO WORLD')
         return True
 
     # Returns {stat} * size, or -1 if {stat} invalid

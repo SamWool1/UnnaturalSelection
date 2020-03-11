@@ -166,7 +166,34 @@ def is_desirable(state, ai):
 	return result
 
 def evolve_stat(state, ai):
-	return True
+	desired_stat = ai.priorities[ai.curr_stat]
+	possible_evo_all = evolutions(species)
+
+	possible_evo = {}
+	for evo in possible_evo_all:
+		if desired_stat in traits[evo]['stats']:
+			possible_evo[evo] = traits[evo]
+
+	print('WANT:', desired_stat)
+	print('OPTIONS:', possible_evo)
+
+	poss_evo_len = len(possible_evo)
+
+	for _ in range(0, poss_evo_len):
+		# Find best possible trait ignoring cost
+		trait, stats = max(possible_evo.items(), key=lambda x: x[1]['stats'][desired_stat])
+		print('TRY:', trait, stats)
+		possible_evo.pop(trait)
+
+		# Try to buy
+		# TODO implement stuff to handle evo cost
+		if True:
+			ai.add_trait(trait)
+			return True
+		else:
+			pass
+
+	return False
 
 def no_evolution(state, ai):
 	ai.curr_stat += 1
@@ -329,10 +356,13 @@ if __name__ == "__main__":
 			# player chooses how to evolve their species
 			evolve_player(state, mod)
 
-		# a round is played with all the species
+		# ai evolution
 		for species in state.all_sp:
 			if species != state.player:
 				bt_evolve(state, species)
+
+		# a round is played with all the species
+		execute_turn(state)
 
 		cur_turn += 1
 		print()
