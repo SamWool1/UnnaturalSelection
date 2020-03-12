@@ -18,7 +18,11 @@ class GameState(object):
 		self.environment = self.initialize_environment()
 
 		#self.all_sp = [Species([], 100, 2), Species([], 100, 1)]
-		self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
+		# self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
+		self.all_sp = [self.initialize_player()]
+		for _ in range(0, 3):
+			sp = self.initialize_species([], 100, 1)
+			self.all_sp.append(sp)
 		self.player_index = 0
 		self.player = self.all_sp[self.player_index]
 
@@ -309,8 +313,10 @@ def execute_turn(state):
 		competition_constant = sp1.stats['speed'] * (sp1.stats['attack'] + sp1.stats['defense']) / ( competition_denominator )
 		
 		# dN1/dt = (r * N1) * (1 - (N1 + c * N2) / K)
+		if carrying_capacity == 0:
+			carrying_capacity = 1
 		population_change = (growth_rate) * sp1.population_size * (1 - (sp1.population_size + competition_constant * competitors_population)/carrying_capacity)
-
+		
 		'''
 		print("c: ", competition_constant)
 		print("K: ", carrying_capacity)
