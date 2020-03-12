@@ -486,10 +486,14 @@ class Species(object):
     curr_stat = -1
 
     # Thanks to https://pynative.com/python-generate-random-string/
-    def random_name(stringLength=10):
+    def random_name(stringLength=10):      
         letters = string.ascii_lowercase
-        return ''.join(random.choice(letters) for i in range(stringLength))
-
+        name = ''
+        for i in range(0, 10):
+            name += (random.choice(letters))
+        #return ''.join(random.choice(letters) for i in range(stringLength))
+        return name
+    
     def __init__(self, initial_traits, initial_pop_size, initial_cons_rate, name=random_name()):
         self.stats = {
             "attack": 1.,
@@ -516,7 +520,11 @@ class Species(object):
         for trait in self.traits:
             self.add_trait(trait)
 
-        self.name = name
+        #generate a random name for npc's
+        if name != "Player's species":
+            self.name = self.random_name()
+        else:
+            self.name = name
 
     def __repr__(self):
         # method for string representing the species
