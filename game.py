@@ -18,7 +18,12 @@ class GameState(object):
         self.environment = self.initialize_environment()
 
         #self.all_sp = [Species([], 100, 2), Species([], 100, 1)]
-        self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
+        # self.all_sp = [self.initialize_player(), self.initialize_species([], 100, 1)]
+        self.all_sp = [self.initialize_player()]
+        for _ in range(0, 3):
+            sp = self.initialize_species([], 100, 1)
+            self.all_sp.append(sp)
+
         self.player_index = 0
         self.player = self.all_sp[self.player_index]
 
@@ -274,8 +279,11 @@ def execute_turn(state):
                 capture_efficiency += penalty 
             capture_efficiency = (capture_efficiency + pred_size_advntg) / 10000 
 
-            prey_killed = min(max((capture_efficiency) * prey.population_size * predator.population_size, 0), prey.population_size)
+            prey_killed = ceil(min(max((capture_efficiency) * prey.population_size * predator.population_size, 0), prey.population_size))
             prey.population_size -= prey_killed
+            #print('prey killed: ' + str(ceil(prey_killed)))
+            #print('prey population: ' + str(ceil(prey.population_size)))
+
             #predators_fed = prey_killed * prey.stats["size"] / predator.consumption_rate
             predators_fed = prey_killed * prey.stats["size"] / (predator.consumption_rate * predator.stats["size"])
 
@@ -305,14 +313,15 @@ def execute_turn(state):
 
         # formula for carrying capcity , modify as needed
         carrying_capacity = ( state.environment.resources / sp1.consumption_rate ) + predators_fed
-        #print('carrying_capacity = ' + str(carrying_capacity))
 
         # formula for competition constant , modify as needed
         competition_constant = sp1.stats['speed'] * (sp1.stats['attack'] + sp1.stats['defense']) / ( competition_denominator )
         
         # dN1/dt = (r * N1) * (1 - (N1 + c * N2) / K)
+        if carrying_capacity == 0:
+            carrying_capacity = 1
         population_change = (growth_rate) * sp1.population_size * (1 - (sp1.population_size + competition_constant * competitors_population)/carrying_capacity)
-
+        
         '''
         print("c: ", competition_constant)
         print("K: ", carrying_capacity)
@@ -325,12 +334,12 @@ def execute_turn(state):
         sp1.population_size -= sp1.population_size * consumption_penalty
         sp1.population_size += population_change
 
-        #check which species has hit a population of zero so that we can remove them
-        if sp1.population_size <= 0:
+        #check which species to remove because they have died out        
+        if sp1.population_size <= 0: 
             species_to_remove.append(sp1)
         if sp2.population_size <= 0:
             species_to_remove.append(sp2)
-    
+        
     # End game with player loss
     if state.all_sp[state.player_index] in species_to_remove:
         print('Player species has perished. Game over!')
@@ -338,8 +347,9 @@ def execute_turn(state):
     
     # Remove dead species
     for sp in species_to_remove:
-        print(sp.name, "has perished!")
-        state.all_sp.remove(sp)
+        if sp in state.all_sp:
+            print(sp.name, "has perished!")
+            state.all_sp.remove(sp)
 
     # Environment resource regain
     state.environment.resources += state.environment.resource_gain

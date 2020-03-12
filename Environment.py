@@ -6,7 +6,7 @@ class Environment(object):
     def __init__(self, food, gain=None):
         self.resources = food
         if gain == None:
-            gain = food/6 # TODO test and adjust if needed
+            gain = food/2 # TODO test and adjust if needed
         self.resource_gain = gain
 
         
